@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  role          String    @default("STUDENT")
+  avatar        String?
+  bio           String?
+  schoolId      String?
+  approved      Boolean   @default(false)
+  discipline    String?
+  points        Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  school        School?   @relation(fields: [schoolId], references: [id])
+  projects      Project[] @relation("ProjectCreator")
+}
+
+model School {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  description     String?
+  logo            String?
+  location        String?
+  homehubApproved Boolean   @default(false)
+  homehubRef      String?   @unique
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  users           User[]
+  projects        Project[]
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  type        String    @default("EDUCATIONAL")
+  status      String    @default("DRAFT")
+  tags        String?
+  creatorId   String
+  schoolId    String
+  isPublic    Boolean   @default(true)
+  featured    Boolean   @default(false)
+  rewards     Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  creator     User      @relation("ProjectCreator", fields: [creatorId], references: [id])
+  school      School    @relation(fields: [schoolId], references: [id])
+}
